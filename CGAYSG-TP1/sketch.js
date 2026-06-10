@@ -174,8 +174,9 @@ function draw() {
     
     // --- 1. DETECTOR ACÚSTICO DE RESPALDO PARA "GLUGLU" ---
     // Detecta dos picos rápidos de voz en un intervalo corto (200-600ms)
-    // No bloqueamos por isNoise aquí porque la voz humana es naturalmente de banda ancha (multibanda)
-    if (activeSoundType === "NONE" && !isSpeechActive) {
+    // No bloqueamos por isNoise ni por activeSoundType aquí, porque la voz humana es naturalmente de banda ancha (multibanda)
+    // y el primer pico 'glu' puede activar transitoriamente otro estado de audio.
+    if (!isSpeechActive) {
       if (voiceEnergy > 80) { // Reducido de 95 a 80 para mayor sensibilidad en micrófonos promedio
         if (!isGluPeakActive) {
           gluPeakStartTime = now;

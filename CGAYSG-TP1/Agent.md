@@ -83,3 +83,7 @@ Desarrollo de un proyecto de arte digital y cinético inspirado en la obra de Gy
   * [x] Ajuste fino del umbral `THRESHOLD_GRAVE` de 200 a 190, logrando un equilibrio óptimo de sensibilidad e insonorización.
   * [x] Eliminación de la constante restrictiva `AMPLITUDE_LOW_MAX` (120) para el siseo. Ahora el sistema detecta de forma fluida siseos tipo "Ssss" fuertes o realizados cerca del micrófono, requiriendo únicamente superar el piso `THRESHOLD_SISEO` (40) por 1-2s.
   * [x] Sincronización del panel de depuración visual para mostrar el nuevo objetivo de graves (190) y siseo (40).
+* [x] **Fase 6.4: Corrección de Exclusión en Detección de Voz ("gluglu")**
+  * [x] Remoción de la restricción `activeSoundType === "NONE"` de la condición del detector de picos acústicos de voz para `"gluglu"`.
+  * [x] Esto permite que el sistema siga contando y reconociendo el patrón rítmico de doble pico de la palabra `"gluglu"` incluso si el primer golpe de voz activa transitoriamente graves o silbidos por encima de sus umbrales.
+  * [x] La animación de burbujas ahora tiene prioridad absoluta sobre cualquier estado activo transitorio.
