@@ -87,3 +87,7 @@ Desarrollo de un proyecto de arte digital y cinético inspirado en la obra de Gy
   * [x] Remoción de la restricción `activeSoundType === "NONE"` de la condición del detector de picos acústicos de voz para `"gluglu"`.
   * [x] Esto permite que el sistema siga contando y reconociendo el patrón rítmico de doble pico de la palabra `"gluglu"` incluso si el primer golpe de voz activa transitoriamente graves o silbidos por encima de sus umbrales.
   * [x] La animación de burbujas ahora tiene prioridad absoluta sobre cualquier estado activo transitorio.
+* [x] **Fase 6.5: Solución de Detección de Siseo y Duraciones Flexibilizadas**
+  * [x] Modificación de la condición de dominancia del siseo en el detector inteligente de ruido de banda ancha: se valida como siseo dominante si supera `THRESHOLD_SISEO` (40) y las frecuencias de graves y silbidos se mantienen quietas (< 80). Esto evita que el ruido constante de baja frecuencia del ventilador de la laptop bloquee la detección.
+  * [x] Flexibilización de la duración válida del siseo (`NEON`) y el grave (`PINS`) ampliando la ventana de activación de `1.0 - 2.0s` a `0.6 - 3.0s` segundos, logrando una interacción oral mucho más natural y orgánica.
+  * [x] Sincronización del panel de depuración visual de la pantalla para reportar de forma precisa los nuevos criterios.

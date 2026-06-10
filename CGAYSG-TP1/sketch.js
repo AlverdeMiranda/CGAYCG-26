@@ -162,9 +162,12 @@ function draw() {
     
     if (bandsActive >= 2) {
       // Definimos si hay un tono dominante claro frente a las demás bandas
-      let isDominantSilbido = (energySilbido > THRESHOLD_SILBIDO && energySilbido > energyZumbido * 1.5);
-      let isDominantZumbido = (energyZumbido > THRESHOLD_GRAVE && energyZumbido > energySilbido * 1.5);
-      let isDominantSiseo = (energySiseo > THRESHOLD_SISEO && energySiseo > energyZumbido * 1.3 && energySiseo > energySilbido * 1.3);
+      // El silbido es dominante si supera su umbral y los graves de fondo están controlados (< 90)
+      let isDominantSilbido = (energySilbido > THRESHOLD_SILBIDO && energyZumbido < 90);
+      // El grave es dominante si supera su umbral y los silbidos están controlados (< 90)
+      let isDominantZumbido = (energyZumbido > THRESHOLD_GRAVE && energySilbido < 90);
+      // El siseo es dominante si supera su umbral mínimo y no hay energía alta en graves ni en silbidos (ambos < 80)
+      let isDominantSiseo = (energySiseo > THRESHOLD_SISEO && energyZumbido < 80 && energySilbido < 80);
       
       // Si no hay ninguna banda dominante y clara, se considera ruido de banda ancha (roces, clics)
       if (!isDominantSilbido && !isDominantZumbido && !isDominantSiseo) {
@@ -227,7 +230,7 @@ function draw() {
       } else if (activeSoundType === "NEON") {
         if (energySiseo < THRESHOLD_SISEO) {
           let duration = (now - soundStartTime) / 1000.0;
-          if (duration >= 1.0 && duration <= 2.0) {
+          if (duration >= 0.6 && duration <= 3.0) { // Flexibilizado de 1.0-2.0s a 0.6-3.0s
             neonTrembleUntil = now + 2000; // Cilindros (neón) vibran por 2s
           }
           activeSoundType = "NONE";
@@ -235,7 +238,7 @@ function draw() {
       } else if (activeSoundType === "PINS") {
         if (energyZumbido < THRESHOLD_GRAVE) {
           let duration = (now - soundStartTime) / 1000.0;
-          if (duration >= 1.0 && duration <= 2.0) {
+          if (duration >= 0.6 && duration <= 3.0) { // Flexibilizado de 1.0-2.0s a 0.6-3.0s
             pinsTrembleUntil = now + 2000; // Pines LED vibran por 2s
           }
           activeSoundType = "NONE";
@@ -295,9 +298,9 @@ function draw() {
     if (energySiseo > THRESHOLD_SISEO) bandsActive++;
     let isNoise = false;
     if (bandsActive >= 2) {
-      let isDominantSilbido = (energySilbido > THRESHOLD_SILBIDO && energySilbido > energyZumbido * 1.5);
-      let isDominantZumbido = (energyZumbido > THRESHOLD_GRAVE && energyZumbido > energySilbido * 1.5);
-      let isDominantSiseo = (energySiseo > THRESHOLD_SISEO && energySiseo > energyZumbido * 1.3 && energySiseo > energySilbido * 1.3);
+      let isDominantSilbido = (energySilbido > THRESHOLD_SILBIDO && energyZumbido < 90);
+      let isDominantZumbido = (energyZumbido > THRESHOLD_GRAVE && energySilbido < 90);
+      let isDominantSiseo = (energySiseo > THRESHOLD_SISEO && energyZumbido < 80 && energySilbido < 80);
       if (!isDominantSilbido && !isDominantZumbido && !isDominantSiseo) {
         isNoise = true;
       }
