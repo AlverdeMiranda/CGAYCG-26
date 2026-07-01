@@ -56,6 +56,8 @@ let isFadedOut = false;
 let globalAlphaMod = 1.0;
 const THRESHOLD_SILENCE = 28; // Elevado de 15 a 28 para ignorar ruidos constantes (como ventilador de notebook)
 let consecutiveSoundFrames = 0; // Para filtrar ruidos cortos imprevistos (clics, teclado)
+let hasRegeneratedInSilence = false;
+
 
 // Umbrales calibrados para los disparadores de audio
 const THRESHOLD_SILBIDO = 130;     // Umbral para silbido (Contracción)
@@ -117,16 +119,17 @@ function draw() {
     let isSoundDetected = (overallVolume > THRESHOLD_SILENCE || energyZumbido > 60 || energySilbido > 60 || energySiseo > 30 || voiceEnergy > 55);
     
     if (isSoundDetected) {
-      lastSoundTime = now;
       if (isFadedOut) {
         consecutiveSoundFrames++;
         if (consecutiveSoundFrames > 12) { // Requiere ~200ms de sonido sostenido (evita clics accidentales de mouse/teclado)
-          generarComposicion(false); // Regenerar con formas aleatorias
+          lastSoundTime = now;
           isFadedOut = false;
           consecutiveSoundFrames = 0;
-          console.log("[Silence System]: Sonido sostenido detectado. Regenerando obra de forma aleatoria.");
+          hasRegeneratedInSilence = false; // Resetear bandera al despertar
+          console.log("[Silence System]: Sonido sostenido detectado. Despertando con nueva composición.");
         }
       } else {
+        lastSoundTime = now;
         consecutiveSoundFrames = 0;
       }
     } else {
@@ -137,7 +140,16 @@ function draw() {
     if (now - lastSoundTime > 4000) {
       isFadedOut = true;
       globalAlphaMod = max(0.0, globalAlphaMod - 0.033); // Se desvanece un 50% más rápido
+      
+      // Regenerar la composición en silencio apenas la pantalla esté completamente negra
+      if (globalAlphaMod === 0.0 && !hasRegeneratedInSilence) {
+        generarComposicion(false); // Regenerar en silencio
+        hasRegeneratedInSilence = true;
+        console.log("[Silence System]: Obra completamente desvanecida. Regenerando en silencio.");
+      }
     } else {
+      isFadedOut = false;
+      hasRegeneratedInSilence = false;
       globalAlphaMod = min(1.0, globalAlphaMod + 0.06); // Reaparece rápidamente (menos latencia de respuesta)
     }
     
@@ -254,12 +266,32 @@ function draw() {
     updateHTMLMeter('grave', energyZumbido, THRESHOLD_GRAVE);
     updateHTMLMeter('siseo', energySiseo, THRESHOLD_SISEO);
     updateHTMLMeter('voz', voiceEnergy, 80);
+    
+    // Actualizar el temporizador de silencio en HTML
+    let silenceTimerEl = document.getElementById('silence-timer');
+    if (silenceTimerEl) {
+      let silenceSecs = (now - lastSoundTime) / 1000.0;
+      silenceSecs = max(0.0, silenceSecs);
+      if (silenceSecs >= 4.0) {
+        silenceTimerEl.innerText = `${silenceSecs.toFixed(1)}s / 4.0s (Apagado)`;
+        silenceTimerEl.style.color = '#FF0055'; // Rosa neón
+      } else {
+        silenceTimerEl.innerText = `${silenceSecs.toFixed(1)}s / 4.0s`;
+        silenceTimerEl.style.color = '#00A8FF'; // Celeste neón
+      }
+    }
   } else {
     // Si el audio no está inicializado, medidores en cero
     updateHTMLMeter('silbido', 0, THRESHOLD_SILBIDO);
     updateHTMLMeter('grave', 0, THRESHOLD_GRAVE);
     updateHTMLMeter('siseo', 0, THRESHOLD_SISEO);
     updateHTMLMeter('voz', 0, 80);
+    
+    let silenceTimerEl = document.getElementById('silence-timer');
+    if (silenceTimerEl) {
+      silenceTimerEl.innerText = '0.0s / 4.0s';
+      silenceTimerEl.style.color = '#bbbbbb';
+    }
   }
   
   // Fallback Físico - Tecla 0: Acortar (cuenta como entrada de interacción, resetea temporizador de silencio)
